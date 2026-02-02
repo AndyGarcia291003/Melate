@@ -62,32 +62,75 @@ class JuegoMelate(SorteoBase):
         else:
             print("Sigue participando.")
             
+# --- CLASE HIJA: Reglas para la Revancha ---
+class JuegoRevancha(SorteoBase):
+    def __init__(self):
+        super().__init__()
+        self.nombre = "Revancha"
+        self.costo = 10  # Costo adicional oficial
+
+    def ejecutar_sorteo_oficial(self):
+        # A diferencia del Melate, la Revancha NO tiene número adicional
+        self.ganadores = random.sample(self.rango, 6)
+
+    def mostrar_resultados(self):
+        aciertos = self.comparar(self.ganadores)
+        num_aciertos = len(aciertos)
+        
+        print(f"\n--- Resultados {self.nombre} ---")
+        print(f"Tus números: {sorted(self.mis_numeros)}")
+        print(f"Sorteo: {sorted(self.ganadores)}")
+        print(f"Aciertos: {num_aciertos}")
+        
+        if num_aciertos >= 2:
+            print(f"¡Ganaste un premio en {self.nombre}!")
+        else:
+            print(f"No hubo suerte en {self.nombre}.")
+            
             
             
 def simular_melate():
-    juego = JuegoMelate() # Creamos el objeto
-    
-    print("\n--- Bienvenido al Juego Melate (Versión POO) ---")
-    print("1) Escribir tus números")
-    print("2) Generar números aleatorios")
+    # 1. Menú de selección de modalidad de juego
+    print("\n--- BIENVENIDO AL SORTEO ---")
+    print("1) Solo Melate ($15)")
+    print("2) Melate + Revancha ($25)")
     
     while True:
-        try:
-            opcion = int(input("\n¿Qué opción eliges?: "))
-            if opcion == 1:
-                juego.elegir_numeros_usuario()
-                break
-            elif opcion == 2:
-                juego.generar_numeros_aleatorios()
-                break
-            else:
-                print("Error: Elige 1 o 2.")
-        except ValueError:
-            print("Error: Ingresa un número válido.")
+        modalidad = input("\nSelecciona tu modalidad: ")
+        if modalidad in ["1", "2"]:
+            break
+        print("Opción no válida.")
 
-    # Ejecutamos la lógica del objeto
-    juego.ejecutar_sorteo_oficial()
-    juego.mostrar_resultados()
+    # 2. Creación de los objetos según la elección
+    juegos_a_jugar = [JuegoMelate()]
+    if modalidad == "2":
+        juegos_a_jugar.append(JuegoRevancha())
+
+    # 3. Decisión de entrada de números (se hace una sola vez)
+    print("\n1) Escribir tus números")
+    print("2) Generar números aleatorios")
+    
+    opcion_input = input("¿Cómo quieres tus números?: ")
+    
+    # Usamos el primer juego para capturar los números (la base es la misma)
+    primer_juego = juegos_a_jugar[0]
+    if opcion_input == "1":
+        primer_juego.elegir_numeros_usuario()
+    else:
+        primer_juego.generar_numeros_aleatorios()
+    
+    # Compartimos los números elegidos con el resto de los sorteos
+    mis_numeros = primer_juego.mis_numeros
+
+    # 4. EJECUCIÓN DE LOS SORTEOS
+    print("\n" + "="*40)
+    print("INICIANDO SORTEOS OFICIALES")
+    print("="*40)
+
+    for juego in juegos_a_jugar:
+        juego.mis_numeros = mis_numeros # Sincronizamos los números
+        juego.ejecutar_sorteo_oficial()
+        juego.mostrar_resultados()
 
 if __name__ == "__main__":
     simular_melate()
